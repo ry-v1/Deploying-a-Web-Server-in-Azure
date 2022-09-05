@@ -1,8 +1,46 @@
 # Azure Infrastructure Operations Project: Deploying a scalable IaaS web server in Azure
 
-### Introduction
-For this project, you will write a Packer template and a Terraform template to deploy a customizable, scalable web server in Azure.
+### Project overview
+In this project, we will use Packer and a Terraform to deploy a customizable, scalable web server in Azure.
 
+The project will consist of the following main steps:
+
+ - Creating a Packer template
+ - Creating a Terraform template
+ - Deploying the infrastructure
+ - Creating documentation in the form of a README
+
+ #### Customizing variables.tf file
+ 
+ Variable blocks have three optional arguments.
+
+ 1. Description: A short description to document the purpose of the variable.
+ 2. Type: The type of data contained in the variable.
+ 3. Default: The default value.
+
+ For example a variable name "prefix" can be defined as below
+ 
+ ```tf
+ 
+ variable "vm_names"{
+   description = "Enter the names of virtual machines to be created"
+   type = list
+   default = ["dev", "test", "prod"]
+   
+```
+
+We can use variable in main.tf as below.
+
+```tf
+resource "azurerm_linux_virtual_machine" "main" {
+  count = var.vm_count
+
+  name                            = "${var.prefix}-vm-${var.vm_names[count.index]}"
+  resource_group_name             = data.azurerm_resource_group.main.name
+  location                        = data.azurerm_resource_group.main.location
+  ...
+```   
+  
 ### Getting Started
 1. Clone this repository
 
@@ -20,44 +58,61 @@ For this project, you will write a Packer template and a Terraform template to d
 
  - Create json file and define the policy
 
- <img width="720" alt="1  Create tag policy json" src="https://user-images.githubusercontent.com/72290009/188312957-432422d5-5cf0-419f-a6c4-b324a9d6e978.png">
+ <img width="1440" alt="image" src="https://user-images.githubusercontent.com/72290009/188371082-0d161efc-e6b3-4d28-ab98-45347b34b5fc.png">
 
  - Create tag policy definition 
 
- <img width="720" alt="2  Create tag policy definition" src="https://user-images.githubusercontent.com/72290009/188312967-00cf6e4c-1596-4cdf-8f9a-d546f7360a83.png">
+ <img width="1440" alt="image" src="https://user-images.githubusercontent.com/72290009/188371274-fa681e11-7016-47b2-834d-6e3fcbc3a358.png">
 
  - Create tag policy assignment
 
- <img width="720" alt="3  Create tag policy assignment" src="https://user-images.githubusercontent.com/72290009/188312975-bcba6daa-6190-4d78-b62f-fe58e0b8304f.png">
+ <img width="1440" alt="image" src="https://user-images.githubusercontent.com/72290009/188371372-fbf6aa9d-d3b5-4dcd-a1e7-acad3ae8f207.png">
 
  - List policy assignment
 
- <img width="720" alt="4  List policy assignment" src="https://user-images.githubusercontent.com/72290009/188312981-6d65288e-1fcb-47f4-b318-ea706648e054.png">
+ <img width="1440" alt="image" src="https://user-images.githubusercontent.com/72290009/188371555-93063b74-0918-4734-8a94-e8bea3fbce71.png">
+
 
 2. Deploying an Image using Packer
  
  - Deploying an Image using packer build command
 
- <img width="720" alt="5  Build Packer Image output-1" src="https://user-images.githubusercontent.com/72290009/188313285-7ddaa34e-1438-4536-bc81-bf01ce7785b8.png">
+ ```bash
+ 
+ packer build server.json
 
- <img width="720" alt="5  Build Packer Image output-2" src="https://user-images.githubusercontent.com/72290009/188313291-9750ee9a-ffd3-4ec5-8ca0-fe40e601cb3d.png">
+ 
+ ```
+
+ <img width="1440" alt="image" src="https://user-images.githubusercontent.com/72290009/188383697-2e7e22bd-10e3-48d2-a4f5-ae0e2b43e228.png">
+
+ <img width="1440" alt="image" src="https://user-images.githubusercontent.com/72290009/188384336-77d8e062-9531-4359-966b-c2efa3b5f28e.png">
+
 
 3. Deploying Infrastructure using Terraform 
 
  - Define the desired infrastructure in main.tf 
  
- <img width="720" alt="6  main tf" src="https://user-images.githubusercontent.com/72290009/188313726-f60165fa-8b12-48c6-bc8e-a476e5de534e.png">
- 
+ <img width="1440" alt="image" src="https://user-images.githubusercontent.com/72290009/188384596-1f3664c1-d713-4292-a348-c4ff93c24bb7.png">
+
  - Define the variables in vars.tf
 
- <img width="720" alt="7  vars tf" src="https://user-images.githubusercontent.com/72290009/188313736-9df8ebef-c66f-4b7b-9e3e-94492bb43459.png">
+ <img width="1440" alt="image" src="https://user-images.githubusercontent.com/72290009/188384820-83af8daa-7f88-43c1-a419-09cfb192a684.png">
 
  - Verify the infrastructure using "terraform plan"
- <img width="720" alt="8  terraform plan" src="https://user-images.githubusercontent.com/72290009/188315319-73ab6b5a-5dc6-42d4-acbe-9fcda4026303.png">
+ 
+ ```bash
+ 
+ terraform plan -out solution.plan
+ 
+ ```
+ 
+ <img width="1440" alt="image" src="https://user-images.githubusercontent.com/72290009/188388091-c7778b86-302b-4c0d-9af6-01cd950fd2b1.png">
 
+ 
  - Create the infrastructure "terraform apply"
  
- For e.g use the variables defined var.tf in the command line to 
+ For e.g use the variables defined variables.tf in the command line to 
  
  ```bash
  
@@ -65,16 +120,20 @@ For this project, you will write a Packer template and a Terraform template to d
  
  ```
 
- <img width="720" alt="9 1 terraform apply" src="https://user-images.githubusercontent.com/72290009/188315509-c5cded40-fa29-4e07-a2e6-4afa750a7321.png">
+ <img width="1440" alt="image" src="https://user-images.githubusercontent.com/72290009/188388670-79175631-05bd-4614-a843-572fa6196b6a.png">
 
+ <img width="1440" alt="image" src="https://user-images.githubusercontent.com/72290009/188389246-fa1fd050-8827-431f-81cc-d6a49da98c89.png">
+
+ 
  - After "terraform apply" resources are created in Azure
  
- <img width="720" alt="9 2 After terraform apply - resources in Azure" src="https://user-images.githubusercontent.com/72290009/188315514-44a0516f-2faf-46a3-8681-87ab69a0fefb.png">
+ <img width="1440" alt="image" src="https://user-images.githubusercontent.com/72290009/188390121-f1a4d509-f8c6-42df-9278-32185b4bce18.png">
 
  - Destroy the infrastructure "terraform destroy"
-
- <img width="720" alt="10 1 terraform apply" src="https://user-images.githubusercontent.com/72290009/188315523-a81b64dc-8209-4feb-9cef-347ab1313764.png">
+ 
+ <img width="1440" alt="image" src="https://user-images.githubusercontent.com/72290009/188391838-7bee4915-912f-4cff-91c8-4d95b71da280.png">
 
  - After destroying, resources are deleted in Azure
  
- <img width="720" alt="10 2 After terraform destroy - resources in Azure" src="https://user-images.githubusercontent.com/72290009/188315544-b7ed07ea-f79e-4be1-8100-7b95c5a6a302.png">
+ <img width="1440" alt="image" src="https://user-images.githubusercontent.com/72290009/188392493-32e6735a-f004-420d-974d-8ebb4da05cec.png">
+
