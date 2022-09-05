@@ -19,15 +19,17 @@ variable "password"{
 }
 
 variable "packerImageId"{
-  default = "/subscriptions/4e780871-9657-43bf-b521-9c73706b76b1/resourceGroups/Azuredevops/providers/Microsoft.Compute/images/myPackerImage"
+  default = "/subscriptions/fbf787c1-ed83-44ad-946e-6ff3b027c400/resourceGroups/Azuredevops/providers/Microsoft.Compute/images/myPackerImage"
 }
 
 variable "vm_count"{
+  description = "Enter the number of virtual machines to be created"
   type = number
-  default = 1
+  default = 3
 }
 
 variable "vm_names"{
+  description = "Enter the names of virtual machines to be created"
   type = list
-  default = ["test"]
+  default = ["dev", "test", "prod"]
 }
