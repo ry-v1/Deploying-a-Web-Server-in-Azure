@@ -24,6 +24,10 @@ resource "azurerm_virtual_network" "main" {
   address_space       = ["10.0.0.0/22"]
   location            = data.azurerm_resource_group.main.location
   resource_group_name = data.azurerm_resource_group.main.name
+
+  tags = {
+    project = "${var.prefix}"
+  }
 }
 
 resource "azurerm_subnet" "internal" {
@@ -31,6 +35,10 @@ resource "azurerm_subnet" "internal" {
   resource_group_name  = data.azurerm_resource_group.main.name
   virtual_network_name = azurerm_virtual_network.main.name
   address_prefixes     = ["10.0.2.0/24"]
+
+  tags = {
+    project = "${var.prefix}"
+  }
 }
 
 # Create a Network Security Group. 
@@ -68,6 +76,9 @@ resource "azurerm_network_security_group" "main" {
     destination_address_prefix = "VirtualNetwork"
   }
 
+  tags = {
+    project = "${var.prefix}"
+  }
 }
 
 # Create a Network Interface.
@@ -84,7 +95,35 @@ resource "azurerm_network_interface" "main" {
     subnet_id                     = azurerm_subnet.internal.id
     private_ip_address_allocation = "Dynamic"
   }
+
+  tags = {
+    project = "${var.prefix}"
+  }
 }
+
+resource "azurerm_network_interface_security_group_association" "main" {
+  count = var.vm_count
+
+  name                      = "${var.prefix}-nic-sg-asoc-${var.vm_names[count.index]}"
+  network_interface_id      = azurerm_network_interface.main[count.index].id
+  network_security_group_id = azurerm_network_security_group.id
+  
+  tags = {
+    project = "${var.prefix}"
+  }
+}
+
+
+resource "azurerm_network_interface_backend_address_pool_association" "main" {
+  network_interface_id    = azurerm_network_interface.main[count.index].id
+  ip_configuration_name   = "internal"
+  backend_address_pool_id = azurerm_lb_backend_address_pool.main[count.index].id
+
+  tags = {
+    project = "${var.prefix}"
+  }
+}
+
 
 # Create a Public IP.
 resource "azurerm_public_ip" "main" {
@@ -93,7 +132,11 @@ resource "azurerm_public_ip" "main" {
   location            = data.azurerm_resource_group.main.location
   allocation_method   = "Static"
 
+  tags = {
+    project = "${var.prefix}"
+  }
 }
+
 # Create a Load Balancer. 
 
 resource "azurerm_lb" "main" {
@@ -106,6 +149,9 @@ resource "azurerm_lb" "main" {
     public_ip_address_id = azurerm_public_ip.main.id
   }
 
+  tags = {
+    project = "${var.prefix}"
+  }
 }
 
 # Your load balancer will need a backend address pool 
@@ -114,6 +160,10 @@ resource "azurerm_lb" "main" {
 resource "azurerm_lb_backend_address_pool" "main" {
   loadbalancer_id     = azurerm_lb.main.id
   name                = "BackEndAddressPool"
+
+  tags = {
+    project = "${var.prefix}"
+  }
 }
 
 # Create a virtual machine availability set.
@@ -123,6 +173,10 @@ resource "azurerm_availability_set" "main" {
   location                    = data.azurerm_resource_group.main.location
   resource_group_name         = data.azurerm_resource_group.main.name
   platform_fault_domain_count = 2
+
+  tags = {
+    project = "${var.prefix}"
+  }
 }
 
 # Create virtual machines. Make sure you use the image you deployed using Packer!
@@ -151,6 +205,10 @@ resource "azurerm_linux_virtual_machine" "main" {
     storage_account_type = "Standard_LRS"
     caching              = "ReadWrite"
   }
+
+  tags = {
+    project = "${var.prefix}"
+  }
 }
 
 resource "azurerm_managed_disk" "main" {
@@ -161,4 +219,8 @@ resource "azurerm_managed_disk" "main" {
   create_option        = "Empty"
   disk_size_gb         = "1"
 
+
+  tags = {
+    project = "${var.prefix}"
+  }
 }
